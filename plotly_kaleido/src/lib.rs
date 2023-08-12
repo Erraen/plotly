@@ -10,6 +10,7 @@
 //! Note that [plotly/Kaleido](https://github.com/plotly/Kaleido) is still in pre-release and as such the `kaleido`
 //! feature should be considered in pre-release mode as well.
 
+use std::env::current_exe;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
@@ -86,6 +87,13 @@ impl Kaleido {
     }
 
     fn root_dir() -> Result<PathBuf, &'static str> {
+        let mut p = current_exe().unwrap();
+        p.pop();
+        p.push("kaleido");
+        if p.exists() {
+            return Ok(p.into());
+        }
+
         let project_dirs = ProjectDirs::from("org", "plotly", "kaleido")
             .expect("Could not create plotly_kaleido config directory.");
         Ok(project_dirs.config_dir().into())
