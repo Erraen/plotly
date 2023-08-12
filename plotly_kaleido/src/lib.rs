@@ -15,6 +15,8 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
+#[cfg(target_os = "windows")]
+use  std::os::windows::process::CommandExt;
 use std::process::{Command, Stdio};
 
 use directories::ProjectDirs;
@@ -145,7 +147,8 @@ impl Kaleido {
         let p = p.to_str().unwrap();
         let p = String::from(p);
 
-        let process = Command::new(p.as_str())
+        let mut process = Command::new(p.as_str());
+        let process = process
             .current_dir(self.cmd_path.parent().unwrap())
             .args([
                 "plotly",
@@ -154,7 +157,12 @@ impl Kaleido {
                 "--disable-breakpad",
                 "--disable-dev-shm-usage",
                 "--single-process",
-            ])
+            ]);
+
+        #[cfg(target_os = "windows")]
+        process.creation_flags(0x08000000);
+
+        let process = process
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
