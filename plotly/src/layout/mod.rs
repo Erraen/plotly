@@ -417,6 +417,37 @@ pub enum SpikeSnap {
     HoveredData,
 }
 
+// TODO: griddash
+#[serde_with::skip_serializing_none]
+#[derive(Serialize, Debug, Clone, FieldSetter)]
+pub struct TickMinor {
+    dtick: Option<f64>,
+    #[serde(rename = "gridcolor")]
+    grid_color: Option<Box<dyn Color>>,
+    #[serde(rename = "gridwidth")]
+    grid_width: Option<usize>,
+    #[serde(rename = "nticks")]
+    n_ticks: Option<usize>,
+    #[serde(rename = "showgrid")]
+    show_grid: Option<bool>,
+    tick0: Option<f64>,
+    #[serde(rename = "tickcolor")]
+    tick_color: Option<Box<dyn Color>>,
+    #[serde(rename = "ticklen")]
+    tick_length: Option<usize>,
+    ticks: Option<TicksDirection>,
+    #[serde(rename = "tickvals")]
+    tick_values: Option<Vec<f64>>,
+    #[serde(rename = "tickwidth")]
+    tick_width: Option<usize>,
+}
+
+impl TickMinor {
+    pub fn new() -> Self {
+        Default::default()
+    }
+}
+
 #[serde_with::skip_serializing_none]
 #[derive(Serialize, Debug, Clone, FieldSetter)]
 pub struct Axis {
@@ -445,6 +476,9 @@ pub struct Axis {
 
     #[field_setter(skip)]
     matches: Option<String>,
+
+    #[serde(rename = "minor")]
+    tick_minor: Option<TickMinor>,
 
     #[serde(rename = "tickvals")]
     tick_values: Option<Vec<f64>>,
@@ -618,7 +652,7 @@ pub struct LayoutGrid {
     row_order: Option<RowOrder>,
     columns: Option<usize>,
     #[serde(rename = "subplots")]
-    sub_plots: Option<Vec<String>>,
+    sub_plots: Option<Vec<Vec<String>>>,
     #[serde(rename = "xaxes")]
     x_axes: Option<Vec<String>>,
     #[serde(rename = "yaxes")]
@@ -1973,6 +2007,10 @@ pub struct Layout {
 
     #[serde(rename = "updatemenus")]
     update_menus: Option<Vec<UpdateMenu>>,
+    #[serde(rename = "minreducedheight")]
+    min_reduced_height: Option<usize>,
+    #[serde(rename = "minreducedwidth")]
+    min_reduced_width: Option<usize>,
 }
 
 impl Layout {
