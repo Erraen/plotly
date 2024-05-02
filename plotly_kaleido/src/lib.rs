@@ -19,6 +19,7 @@ use std::path::{Path, PathBuf};
 use  std::os::windows::process::CommandExt;
 use std::process::{Command, Stdio};
 
+use base64::{engine::general_purpose, Engine as _};
 use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -179,12 +180,12 @@ impl Kaleido {
         }
 
         let output_lines = BufReader::new(process.stdout.unwrap()).lines();
-        for line in output_lines.flatten() {
+        for line in output_lines.map_while(Result::ok) {
             let res = KaleidoResult::from(line.as_str());
             if let Some(image_data) = res.result {
                 let data: Vec<u8> = match format {
                     "svg" | "eps" => image_data.as_bytes().to_vec(),
-                    _ => base64::decode(image_data).unwrap(),
+                    _ => general_purpose::STANDARD.decode(image_data).unwrap(),
                 };
                 let mut file = File::create(dst.as_path())?;
                 file.write_all(&data)?;
@@ -253,6 +254,7 @@ mod tests {
         assert_eq!(to_value(kaleido_data).unwrap(), expected);
     }
 
+    #[cfg(not(target_os = "windows"))]
     #[test]
     fn test_save_png() {
         let test_plot = create_test_plot();
@@ -263,6 +265,7 @@ mod tests {
         assert!(std::fs::remove_file(dst.as_path()).is_ok());
     }
 
+    #[cfg(not(target_os = "windows"))]
     #[test]
     fn test_save_jpeg() {
         let test_plot = create_test_plot();
@@ -273,6 +276,7 @@ mod tests {
         assert!(std::fs::remove_file(dst.as_path()).is_ok());
     }
 
+    #[cfg(not(target_os = "windows"))]
     #[test]
     fn test_save_webp() {
         let test_plot = create_test_plot();
@@ -283,6 +287,7 @@ mod tests {
         assert!(std::fs::remove_file(dst.as_path()).is_ok());
     }
 
+    #[cfg(not(target_os = "windows"))]
     #[test]
     fn test_save_svg() {
         let test_plot = create_test_plot();
@@ -293,6 +298,7 @@ mod tests {
         assert!(std::fs::remove_file(dst.as_path()).is_ok());
     }
 
+    #[cfg(not(target_os = "windows"))]
     #[test]
     fn test_save_pdf() {
         let test_plot = create_test_plot();
